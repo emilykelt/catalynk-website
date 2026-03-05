@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalynk — AI-Powered Clinical Triage & Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --cream:        #F5F2EB;
+      --dark:         #0D1B11;
+      --green-deep:   #1A3828;
+      --green-mid:    #2A5C44;
+      --green-accent: #4D9E75;
+      --green-light:  #8FD4B2;
+      --white:        #FFFFFF;
+      --text:         #1C1C1C;
+      --muted:        #6B7280;
+      --border:       #E5E1D8;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans:  'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      color: var(--text);
+      background: var(--cream);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SCROLLBAR ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--green-mid); border-radius: 3px; }
+
+    /* ─── NAV ──────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 22px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s, backdrop-filter 0.4s, padding 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(13, 27, 17, 0.88);
+      backdrop-filter: blur(20px);
+      padding: 16px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 21px; font-weight: 700;
+      color: white; text-decoration: none; letter-spacing: -0.4px;
+    }
+    .nav-logo span { color: var(--green-light); }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 34px; list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.65); text-decoration: none;
+      font-size: 14px; font-weight: 400; letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: white; }
+
+    .btn-nav {
+      background: var(--green-accent) !important;
+      color: white !important;
+      padding: 9px 20px;
+      border-radius: 7px;
+      font-weight: 500 !important;
+      transition: background 0.2s, transform 0.15s !important;
+    }
+    .btn-nav:hover {
+      background: #5BB888 !important;
+      transform: translateY(-1px);
+    }
+
+    /* ─── HERO ─────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      background: var(--dark);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 130px 40px 80px;
+      position: relative; overflow: hidden;
+    }
+
+    /* Grid overlay */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+    }
+
+    /* Animated blobs */
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); opacity: 0.22;
+      animation: blobFloat 9s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .blob-1 { width:700px; height:700px; background:radial-gradient(circle,#2A5C44,transparent); top:-160px; left:-160px; animation-delay:0s; }
+    .blob-2 { width:500px; height:500px; background:radial-gradient(circle,#1A4D35,transparent); bottom:-80px; right:-80px; animation-delay:-3.5s; }
+    .blob-3 { width:320px; height:320px; background:radial-gradient(circle,#4D9E75,transparent); top:42%; left:32%; animation-delay:-6s; animation-duration:12s; }
+
+    @keyframes blobFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(28px,-18px) scale(1.05); }
+      66%      { transform: translate(-18px,12px) scale(0.96); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center; max-width: 860px; margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(77,158,117,0.14);
+      border: 1px solid rgba(77,158,117,0.28);
+      color: var(--green-light);
+      font-size: 11.5px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 6px 18px; border-radius: 100px; margin-bottom: 32px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--green-light);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.4; transform:scale(0.7); }
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(44px, 7.5vw, 86px);
+      font-weight: 700; color: white;
+      line-height: 1.04; letter-spacing: -0.03em;
+      margin-bottom: 26px;
+    }
+    .hero-title em { font-style: italic; color: var(--green-light); }
+
+    .hero-sub {
+      font-size: 18px; color: rgba(255,255,255,0.5);
+      line-height: 1.72; font-weight: 300;
+      max-width: 580px; margin: 0 auto 42px;
+    }
+
+    .hero-ctas {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-accent); color: white;
+      padding: 14px 30px; border-radius: 8px;
+      font-size: 15px; font-weight: 500; text-decoration: none;
+      border: none; cursor: pointer; font-family: var(--sans);
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      background: #5BB888; transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(77,158,117,0.32);
+    }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: rgba(255,255,255,0.72);
+      padding: 14px 28px; border-radius: 8px;
+      font-size: 15px; font-weight: 400; text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.14);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.32); color: white; }
+
+    /* ─── HERO PREVIEW CARD ─────────────────────────────────── */
+    .hero-preview {
+      position: relative; z-index: 2;
+      margin-top: 64px; width: 100%; max-width: 780px;
+    }
+
+    .preview-window {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(24px);
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 48px 96px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .win-bar {
+      background: rgba(0,0,0,0.28);
+      padding: 11px 16px;
+      display: flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .win-dot { width:10px; height:10px; border-radius:50%; }
+    .win-dot:nth-child(1){background:#FF5F57;} .win-dot:nth-child(2){background:#FEBC2E;} .win-dot:nth-child(3){background:#28C840;}
+    .win-title { font-size:11px; color:rgba(255,255,255,0.3); margin-left:8px; }
+
+    .win-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 260px; }
+
+    /* Chat pane */
+    .chat-pane {
+      padding: 18px 20px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .pane-label {
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: rgba(255,255,255,0.28);
+      margin-bottom: 14px;
+    }
+
+    .chat-msg { margin-bottom: 10px; }
+    .msg-row { display: flex; align-items: flex-start; gap: 8px; }
+    .c-ava {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--green-accent); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: white; font-weight: 700;
+    }
+    .bubble {
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 8px 12px;
+      font-size: 11.5px; color: rgba(255,255,255,0.72);
+      line-height: 1.5; max-width: 190px;
+    }
+    .bubble.patient {
+      background: rgba(77,158,117,0.2);
+      margin-left: auto; max-width: 175px;
+    }
+    .urg-tag {
+      display: inline-block;
+      background: rgba(245,158,11,0.18); color: #F59E0B;
+      font-size: 9.5px; padding: 2px 8px;
+      border-radius: 4px; font-weight: 600;
+      letter-spacing: 0.04em; margin-top: 5px;
+    }
+
+    /* Dashboard pane */
+    .dash-pane { padding: 18px 20px; }
+    .p-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px; border-radius: 8px; margin-bottom: 6px;
+      background: rgba(255,255,255,0.04);
+    }
+    .p-row.active { background: rgba(77,158,117,0.12); }
+    .p-ava {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg,#4D9E75,#2A5C44); flex-shrink: 0;
+    }
+    .p-info { flex: 1; }
+    .p-name  { font-size: 11px; color: rgba(255,255,255,0.8); font-weight: 500; }
+    .p-symp  { font-size: 10px; color: rgba(255,255,255,0.38); }
+    .u-badge {
+      font-size: 9.5px; padding: 2px 8px;
+      border-radius: 4px; font-weight: 600; white-space: nowrap;
+    }
+    .u-badge.h { background:rgba(239,68,68,0.18); color:#EF4444; }
+    .u-badge.m { background:rgba(245,158,11,0.18); color:#F59E0B; }
+    .u-badge.l { background:rgba(77,158,117,0.18); color:#4D9E75; }
+    .dash-footer {
+      margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 10px; color: rgba(255,255,255,0.28);
+    }
+
+    /* ─── LOGOS BAR ─────────────────────────────────────────── */
+    #logos {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 22px 0; overflow: hidden;
+    }
+    .logos-inner { display: flex; align-items: center; }
+    .logos-prefix {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #BCBAB4;
+      padding: 0 40px; white-space: nowrap; flex-shrink: 0;
+      border-right: 1px solid #E5E1D8;
+    }
+    .logos-scroll { overflow: hidden; flex: 1; }
+    .logos-track {
+      display: flex; gap: 64px;
+      animation: marquee 22s linear infinite;
+      width: max-content;
+    }
+    .logo-item {
+      font-family: var(--serif); font-size: 15px;
+      color: #CECCCA; font-weight: 600;
+      letter-spacing: 0.04em; white-space: nowrap;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── SECTIONS ──────────────────────────────────────────── */
+    section { padding: 100px 48px; }
+
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--green-mid); margin-bottom: 16px;
+    }
+    .section-eyebrow::before {
+      content: ''; width: 20px; height: 1px; background: var(--green-mid);
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(32px, 4.2vw, 54px);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -0.025em; color: var(--dark);
+      margin-bottom: 18px;
+    }
+    .section-title em { font-style: italic; color: var(--green-mid); }
+
+    .section-sub {
+      font-size: 17px; color: var(--muted); line-height: 1.72;
+      max-width: 540px; font-weight: 300;
+    }
+
+    /* ─── PROBLEM ───────────────────────────────────────────── */
+    #problem { background: var(--cream); }
+
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
+      max-width: 1180px; margin: 0 auto;
+    }
+
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 18px; margin-top: 44px;
+    }
+    .stat-tile {
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; padding: 22px;
+    }
+    .stat-num {
+      font-family: var(--serif); font-size: 38px; font-weight: 700;
+      color: var(--dark); line-height: 1; margin-bottom: 6px;
+    }
+    .stat-lbl { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* Problem visual card */
+    .record-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 16px; padding: 26px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    }
+    .rec-header {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 16px; margin-bottom: 20px;
+      border-bottom: 1px solid #F0EDE6;
+    }
+    .doc-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--green-mid), var(--dark));
+      flex-shrink: 0;
+    }
+    .rec-info h4 { font-size: 14px; font-weight: 600; color: var(--dark); }
+    .rec-info span { font-size: 12px; color: var(--muted); }
+
+    .t-item { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+    .t-dot  { width:8px; height:8px; border-radius:50%; background:var(--green-accent); margin-top:5px; flex-shrink:0; }
+    .t-dot.w { background:#F59E0B; } .t-dot.a { background:#EF4444; }
+    .t-time { font-size: 11px; color: var(--green-mid); font-weight: 500; }
+    .t-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .ai-summary {
+      margin-top: 16px; padding: 14px;
+      background: #F7F4EE; border-radius: 10px;
+    }
+    .ai-summary-head { font-size: 12px; font-weight: 600; color: #1A3828; margin-bottom: 4px; }
+    .ai-summary-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+    /* ─── HOW IT WORKS ──────────────────────────────────────── */
+    #how-it-works { background: white; }
+    .steps-head { text-align: center; max-width: 600px; margin: 0 auto 72px; }
+
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 40px; max-width: 1100px; margin: 0 auto;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute; top: 40px;
+      left: calc(16.7% + 18px); right: calc(16.7% + 18px);
+      height: 1px;
+      background: linear-gradient(90deg, var(--green-accent), rgba(77,158,117,0.2));
+    }
+
+    .step-card { position: relative; }
+    .step-num {
+      font-family: var(--serif); font-size: 80px; font-weight: 700;
+      color: #F0EDE6; line-height: 1;
+      position: absolute; top: -14px; right: 0;
+    }
+    .step-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--green-mid), var(--dark));
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; position: relative; z-index: 1;
+    }
+    .step-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 1.5; }
+    .step-title { font-family: var(--serif); font-size: 22px; font-weight: 600; margin-bottom: 12px; color: var(--dark); }
+    .step-desc { font-size: 14.5px; color: var(--muted); line-height: 1.72; }
+
+    /* ─── FEATURES ──────────────────────────────────────────── */
+    #features { background: var(--cream); }
+    .feat-head {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: end;
+      max-width: 1100px; margin: 0 auto 52px;
+    }
+    .feat-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 22px; max-width: 1100px; margin: 0 auto;
+    }
+    .feat-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px;
+      transition: transform 0.22s, box-shadow 0.22s;
+    }
+    .feat-card:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(0,0,0,0.08); }
+    .feat-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: #EFF7F3;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .feat-icon svg { width: 20px; height: 20px; stroke: var(--green-mid); fill: none; stroke-width: 1.5; }
+    .feat-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--dark); }
+    .feat-desc  { font-size: 14px; color: var(--muted); line-height: 1.68; }
+
+    /* ─── STATS ─────────────────────────────────────────────── */
+    #stats {
+      background: var(--dark); position: relative; overflow: hidden;
+    }
+    #stats::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 48px; max-width: 1100px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+    .stat-item { text-align: center; }
+    .stat-big  {
+      font-family: var(--serif);
+      font-size: clamp(40px, 5vw, 64px); font-weight: 700;
+      color: white; line-height: 1; margin-bottom: 10px;
+    }
+    .stat-big em { font-style: normal; color: var(--green-light); }
+    .stat-desc  { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.55; }
+
+    /* ─── TESTIMONIALS ──────────────────────────────────────── */
+    #testimonials { background: white; }
+    .test-head { text-align: center; max-width: 580px; margin: 0 auto 52px; }
+    .test-empty {
+      max-width: 680px; margin: 0 auto;
+      text-align: center; padding: 64px 48px;
+      border: 1.5px dashed #D5D0C8;
+      border-radius: 20px; background: var(--cream);
+    }
+    .test-empty-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-mid), var(--dark));
+      margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .test-empty-icon svg { width: 28px; height: 28px; stroke: white; fill: none; stroke-width: 1.5; }
+    .test-empty h3 { font-family: var(--serif); font-size: 24px; font-weight: 600; margin-bottom: 12px; color: var(--dark); }
+    .test-empty p  { font-size: 15px; color: var(--muted); line-height: 1.72; margin-bottom: 28px; }
+
+    /* ─── PRICING ───────────────────────────────────────────── */
+    #pricing { background: var(--cream); }
+    .price-head { text-align: center; max-width: 580px; margin: 0 auto 52px; }
+    .price-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 22px; max-width: 1060px; margin: 0 auto;
+      align-items: start;
+    }
+    .price-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 16px; padding: 34px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .price-card:not(.featured):hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(0,0,0,0.08); }
+    .price-card.featured {
+      background: var(--dark); border-color: var(--green-mid);
+      transform: scale(1.04);
+    }
+
+    .price-badge {
+      display: inline-block;
+      background: var(--green-accent); color: white;
+      font-size: 11px; padding: 4px 12px; border-radius: 100px;
+      font-weight: 500; margin-bottom: 18px; letter-spacing: 0.04em;
+    }
+    .price-tier { font-size: 11.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .price-card.featured .price-tier { color: rgba(255,255,255,0.45); }
+    .price-name { font-family: var(--serif); font-size: 24px; font-weight: 700; color: var(--dark); }
+    .price-card.featured .price-name { color: white; }
+    .price-amount { font-family: var(--serif); font-size: 44px; font-weight: 700; color: var(--dark); line-height: 1; margin: 18px 0 4px; }
+    .price-card.featured .price-amount { color: white; }
+    .price-cadence { font-size: 12px; color: var(--muted); margin-bottom: 26px; }
+    .price-card.featured .price-cadence { color: rgba(255,255,255,0.38); }
+    .price-divider { height: 1px; background: var(--border); margin-bottom: 22px; }
+    .price-card.featured .price-divider { background: rgba(255,255,255,0.1); }
+    .price-list { list-style: none; margin-bottom: 30px; }
+    .price-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--muted); margin-bottom: 11px; line-height: 1.55;
+    }
+    .price-card.featured .price-list li { color: rgba(255,255,255,0.58); }
+    .price-list li::before {
+      content: '';
+      width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' stroke='%234D9E75' stroke-width='1.5' fill='none'/%3E%3Cpath d='M5 8l2 2 4-4' stroke='%234D9E75' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") no-repeat center / contain;
+    }
+    .btn-price {
+      display: block; text-align: center;
+      padding: 13px 24px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; text-decoration: none;
+      transition: all 0.2s; cursor: pointer; font-family: var(--sans);
+    }
+    .btn-price.outline { border: 1px solid var(--border); color: var(--dark); background: transparent; }
+    .btn-price.outline:hover { border-color: var(--dark); }
+    .btn-price.solid  { background: var(--green-accent); color: white; border: none; }
+    .btn-price.solid:hover { background: #5BB888; box-shadow: 0 8px 24px rgba(77,158,117,0.3); }
+    .price-note { text-align: center; margin-top: 28px; font-size: 13px; color: var(--muted); }
+
+    /* ─── ABOUT ─────────────────────────────────────────────── */
+    #about { background: white; }
+    .about-head { max-width: 1100px; margin: 0 auto; }
+    .about-top { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    .about-quote {
+      margin-top: 32px; padding: 20px 24px;
+      background: var(--cream); border-radius: 12px;
+      border-left: 3px solid var(--green-accent);
+    }
+    .about-quote p { font-size: 15px; color: var(--muted); line-height: 1.72; font-style: italic; }
+
+    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 56px; }
+    .team-card {
+      background: var(--cream); border: 1px solid var(--border);
+      border-radius: 16px; padding: 30px;
+    }
+    .team-ava {
+      width: 60px; height: 60px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--green-mid), var(--dark));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--serif); font-size: 22px; color: white; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .team-name { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
+    .team-role { font-size: 12px; color: var(--green-mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+    .team-bio  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .team-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    .chip {
+      background: white; border: 1px solid var(--border);
+      border-radius: 100px; padding: 4px 12px;
+      font-size: 12px; color: var(--muted);
+    }
+
+    /* ─── DEMO ──────────────────────────────────────────────── */
+    #demo { background: var(--dark); position: relative; overflow: hidden; }
+    #demo::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    .demo-blob {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(42,92,68,0.35), transparent);
+      border-radius: 50%; filter: blur(100px);
+      right: -120px; top: -120px; pointer-events: none;
+    }
+    .demo-inner {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
+      max-width: 1100px; margin: 0 auto;
+    }
+
+    .demo-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 700; color: white; line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 16px; }
+    .demo-title em { font-style: italic; color: var(--green-light); }
+    .demo-sub  { font-size: 17px; color: rgba(255,255,255,0.48); line-height: 1.72; font-weight: 300; }
+
+    .demo-perks { display: flex; flex-direction: column; gap: 16px; margin-top: 40px; }
+    .perk { display: flex; align-items: flex-start; gap: 14px; }
+    .perk-icon {
+      width: 34px; height: 34px; flex-shrink: 0;
+      background: rgba(77,158,117,0.14); border: 1px solid rgba(77,158,117,0.28);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    }
+    .perk-icon svg { width: 15px; height: 15px; stroke: var(--green-light); fill: none; stroke-width: 2; }
+    .perk h4 { font-size: 14px; font-weight: 500; color: white; margin-bottom: 2px; }
+    .perk p  { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.55; }
+
+    /* Demo form */
+    .demo-form {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 36px;
+      backdrop-filter: blur(12px);
+    }
+    .form-head { margin-bottom: 24px; }
+    .form-head h3 { font-family: var(--serif); font-size: 22px; color: white; font-weight: 600; margin-bottom: 5px; }
+    .form-head p  { font-size: 13px; color: rgba(255,255,255,0.38); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 12.5px; color: rgba(255,255,255,0.45); margin-bottom: 7px; }
+    .form-input, .form-select {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 11px 14px;
+      font-size: 14px; color: white; font-family: var(--sans);
+      outline: none; transition: border-color 0.2s;
+      appearance: none;
+    }
+    .form-input::placeholder { color: rgba(255,255,255,0.22); }
+    .form-input:focus, .form-select:focus { border-color: var(--green-accent); }
+    .form-select { color: rgba(255,255,255,0.55); cursor: pointer; }
+    .form-select option { background: #1A3828; }
+
+    .btn-submit {
+      width: 100%; background: var(--green-accent); color: white;
+      padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500;
+      border: none; cursor: pointer; font-family: var(--sans);
+      transition: background 0.2s, transform 0.15s; margin-top: 4px;
+    }
+    .btn-submit:hover { background: #5BB888; transform: translateY(-1px); }
+
+    /* ─── FOOTER ────────────────────────────────────────────── */
+    footer { background: #060E08; padding: 64px 48px 40px; }
+    .foot-inner { max-width: 1100px; margin: 0 auto; }
+    .foot-top {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 48px; padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 36px;
+    }
+    .foot-brand { }
+    .foot-logo { font-family: var(--serif); font-size: 20px; font-weight: 700; color: white; text-decoration: none; display: block; margin-bottom: 12px; }
+    .foot-logo span { color: var(--green-light); }
+    .foot-tagline { font-size: 13px; color: rgba(255,255,255,0.32); line-height: 1.6; max-width: 200px; }
+    .foot-col h5 { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 16px; }
+    .foot-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.32); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .foot-col a:hover { color: rgba(255,255,255,0.65); }
+    .foot-bottom { display: flex; justify-content: space-between; align-items: center; }
+    .foot-copy { font-size: 12px; color: rgba(255,255,255,0.28); }
+    .foot-links { display: flex; gap: 24px; }
+    .foot-links a { font-size: 12px; color: rgba(255,255,255,0.28); text-decoration: none; transition: color 0.2s; }
+    .foot-links a:hover { color: rgba(255,255,255,0.6); }
+
+    /* ─── ANIMATIONS ────────────────────────────────────────── */
+    .fade-up {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.in { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.08s; }
+    .d2 { transition-delay: 0.16s; }
+    .d3 { transition-delay: 0.24s; }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 20px; }
+      nav.scrolled { padding: 14px 20px; }
+      .nav-links { display: none; }
+      section { padding: 68px 20px; }
+      .two-col, .feat-head, .about-top, .demo-inner { grid-template-columns: 1fr; gap: 40px; }
+      .steps-grid, .feat-grid, .price-grid { grid-template-columns: 1fr; }
+      .price-card.featured { transform: scale(1); }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .team-grid { grid-template-columns: 1fr; }
+      .foot-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .win-body { grid-template-columns: 1fr; }
+      .steps-grid::before { display: none; }
+    }
+    @media (max-width: 560px) {
+      .hero-title { font-size: 38px; }
+      .form-row { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .foot-top { grid-template-columns: 1fr; }
+      .foot-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAV ═════════════════════════════════════════════════════ -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Cata<span>lynk</span></a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">Product</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#testimonials">Testimonials</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#demo" class="btn-nav">Request a Demo</a></li>
+  </ul>
+</nav>
+
+<!-- ═══ HERO ═════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="hero-content fade-up">
+    <div class="hero-badge">Now accepting pilot clinics</div>
+    <h1 class="hero-title">
+      Smarter triage.<br>
+      <em>Real-time</em> patient context.
+    </h1>
+    <p class="hero-sub">
+      Catalynk replaces vague phone calls with conversational AI triage. Patients describe their symptoms — we track how they evolve — so your doctor has the full picture before they sit down.
+    </p>
+    <div class="hero-ctas">
+      <a href="#demo" class="btn-primary">
+        Request a Demo
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#how-it-works" class="btn-ghost">
+        See how it works
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Floating UI mockup -->
+  <div class="hero-preview fade-up d2">
+    <div class="preview-window">
+      <div class="win-bar">
+        <div class="win-dot"></div><div class="win-dot"></div><div class="win-dot"></div>
+        <span class="win-title">Catalynk — Patient Interface & Clinic Dashboard</span>
+      </div>
+      <div class="win-body">
+        <!-- Chat side -->
+        <div class="chat-pane">
+          <div class="pane-label">Patient triage conversation</div>
+          <div class="chat-msg">
+            <div class="msg-row">
+              <div class="c-ava">C</div>
+              <div class="bubble">Hi Sarah. Can you describe what you've been experiencing over the past few days?</div>
+            </div>
+          </div>
+          <div class="chat-msg" style="display:flex;justify-content:flex-end">
+            <div class="bubble patient">Sharp chest pain on the left, started 3 days ago. Worse when I breathe deeply.</div>
+          </div>
+          <div class="chat-msg">
+            <div class="msg-row">
+              <div class="c-ava">C</div>
+              <div class="bubble">
+                How would you rate the severity right now, 1–10?
+                <div class="urg-tag">⚡ Medium urgency detected</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-msg" style="display:flex;justify-content:flex-end">
+            <div class="bubble patient">Around a 6. I also have a slight fever since yesterday.</div>
+          </div>
+        </div>
+        <!-- Dashboard side -->
+        <div class="dash-pane">
+          <div class="pane-label">Clinic dashboard — Today's queue</div>
+          <div class="p-row active">
+            <div class="p-ava"></div>
+            <div class="p-info">
+              <div class="p-name">Sarah M.</div>
+              <div class="p-symp">Chest pain · 3 days · Fever</div>
+            </div>
+            <div class="u-badge m">Medium</div>
+          </div>
+          <div class="p-row">
+            <div class="p-ava" style="background:linear-gradient(135deg,#EF4444,#7F1D1D)"></div>
+            <div class="p-info">
+              <div class="p-name">Lin W.</div>
+              <div class="p-symp">Abdominal pain · Sudden onset</div>
+            </div>
+            <div class="u-badge h">Urgent</div>
+          </div>
+          <div class="p-row">
+            <div class="p-ava" style="background:linear-gradient(135deg,#5BB888,#2A5C44)"></div>
+            <div class="p-info">
+              <div class="p-name">James K.</div>
+              <div class="p-symp">Back pain · Recurring · 2 wks</div>
+            </div>
+            <div class="u-badge l">Routine</div>
+          </div>
+          <div class="dash-footer">AI clinical summaries ready for 3 patients</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LOGOS ═════════════════════════════════════════════════════ -->
+<div id="logos">
+  <div class="logos-inner">
+    <span class="logos-prefix">In conversation with</span>
+    <div class="logos-scroll">
+    <div class="logos-track">
+      <div class="logo-item">NHS Primary Care</div>
+      <div class="logo-item">Cambridge Medicine</div>
+      <div class="logo-item">Private Clinics UK</div>
+      <div class="logo-item">GP Practices</div>
+      <div class="logo-item">Specialist Clinics</div>
+      <!-- duplicate for infinite scroll -->
+      <div class="logo-item">NHS Primary Care</div>
+      <div class="logo-item">Cambridge Medicine</div>
+      <div class="logo-item">Private Clinics UK</div>
+      <div class="logo-item">GP Practices</div>
+      <div class="logo-item">Specialist Clinics</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROBLEM ═══════════════════════════════════════════════════ -->
+<section id="problem">
+  <div class="two-col">
+    <div class="fade-up">
+      <div class="section-eyebrow">The Problem</div>
+      <h2 class="section-title">
+        Your appointment<br>is 7 minutes.<br>
+        <em>Your patient's history is years.</em>
+      </h2>
+      <p class="section-sub">
+        Doctors are handed vague intake forms. Patients forget symptoms. Context is lost before the consultation even starts. Catalynk fixes this — continuously, automatically, from first symptom to final summary.
+      </p>
+      <div class="stat-grid">
+        <div class="stat-tile">
+          <div class="stat-num">5–10</div>
+          <div class="stat-lbl">minutes wasted per appointment reconstructing patient history</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-num">£50k</div>
+          <div class="stat-lbl">in recoverable clinical time per practice annually</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-num">67k+</div>
+          <div class="stat-lbl">primary care practices in the US alone</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-num">$1T</div>
+          <div class="stat-lbl">annual administrative overhead in US healthcare</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-up d1">
+      <div class="record-card">
+        <div class="rec-header">
+          <div class="doc-icon"></div>
+          <div class="rec-info">
+            <h4>Patient: Sarah M.</h4>
+            <span>Living symptom record — continuously updated</span>
+          </div>
+        </div>
+        <div class="t-item">
+          <div class="t-dot"></div>
+          <div>
+            <div class="t-time">Day 1 — 09:41</div>
+            <div class="t-text">Mild chest tightness. No fever. Patient rated discomfort 3/10.</div>
+          </div>
+        </div>
+        <div class="t-item">
+          <div class="t-dot w"></div>
+          <div>
+            <div class="t-time">Day 2 — 14:22</div>
+            <div class="t-text">Pain sharpened. Worse on inspiration. Fever 37.8°C. Urgency reassessed to Medium.</div>
+          </div>
+        </div>
+        <div class="t-item">
+          <div class="t-dot a"></div>
+          <div>
+            <div class="t-time">Day 3 — 08:05</div>
+            <div class="t-text">Fever 38.4°C. Radiating pain reported. AI escalated to Urgent — appointment brought forward.</div>
+          </div>
+        </div>
+        <div class="ai-summary">
+          <div class="ai-summary-head">✦ AI Clinical Summary</div>
+          <div class="ai-summary-body">Progressive pleuritic chest pain with pyrexia suggests possible pleuritis or pulmonary involvement. Recommend chest auscultation and CRP/FBC on arrival.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ══════════════════════════════════════════════ -->
+<section id="how-it-works">
+  <div class="steps-head fade-up">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">Three steps to a <em>smarter consultation</em></h2>
+    <p class="section-sub">From first symptom to clinical summary — automatically, continuously, without extra work from your team.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card fade-up">
+      <div class="step-num">01</div>
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3 class="step-title">Patient describes symptoms</h3>
+      <p class="step-desc">The patient opens Catalynk and speaks to an AI that understands natural language. It asks targeted follow-up questions informed by their health history — building a complete picture, not just a checkbox list.</p>
+    </div>
+    <div class="step-card fade-up d1">
+      <div class="step-num">02</div>
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <h3 class="step-title">Symptoms evolve in real time</h3>
+      <p class="step-desc">As the patient waits, they log how their condition changes. Catalynk builds a timestamped clinical thread — capturing severity trends, new developments, and progression that a single intake form can never show.</p>
+    </div>
+    <div class="step-card fade-up d2">
+      <div class="step-num">03</div>
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+      </div>
+      <h3 class="step-title">Doctor receives the full picture</h3>
+      <p class="step-desc">By the time the appointment starts, your doctor has an AI-generated clinical summary — what happened, when, how it progressed, and likely differentials. No wasted time. Every minute counts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ══════════════════════════════════════════════════ -->
+<section id="features">
+  <div class="feat-head fade-up">
+    <div>
+      <div class="section-eyebrow">Features</div>
+      <h2 class="section-title">Built for the<br><em>clinical workflow</em></h2>
+    </div>
+    <p class="section-sub" style="align-self:flex-end">Everything your team needs to run smarter consultations — without changing how you work.</p>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card fade-up">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      </div>
+      <h3 class="feat-title">Conversational AI Triage</h3>
+      <p class="feat-desc">Patients describe symptoms naturally. Our AI adapts to their health history, asking follow-up questions to build a complete clinical picture — no forms, no guesswork.</p>
+    </div>
+    <div class="feat-card fade-up d1">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <h3 class="feat-title">Dynamic Urgency Scoring</h3>
+      <p class="feat-desc">Every patient is assigned a real-time urgency score that updates as their symptoms evolve. Your reception team sees who needs to be seen first — backed by AI, not gut feel.</p>
+    </div>
+    <div class="feat-card fade-up d2">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+      </div>
+      <h3 class="feat-title">Thread-Based Symptom Tracking</h3>
+      <p class="feat-desc">Patients log symptom changes as they happen. A timestamped thread shows progression over days — giving your doctor temporal context, not just today's snapshot.</p>
+    </div>
+    <div class="feat-card fade-up">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+      </div>
+      <h3 class="feat-title">Auto-Generated Clinical Summaries</h3>
+      <p class="feat-desc">Before each appointment, Catalynk produces a structured summary: key symptoms, timeline, severity trend, and AI-suggested differentials — ready before the doctor enters the room.</p>
+    </div>
+    <div class="feat-card fade-up d1">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2 2h-2a2 2 0 0 0-2-2z"/></svg>
+      </div>
+      <h3 class="feat-title">Prioritised Clinic Dashboard</h3>
+      <p class="feat-desc">Your team sees every patient's status at a glance — urgency level, chief complaint, duration, and prep materials. Manage your day with clarity, not chaos.</p>
+    </div>
+    <div class="feat-card fade-up d2">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+      </div>
+      <h3 class="feat-title">Privacy & Compliance First</h3>
+      <p class="feat-desc">Built for GDPR and NHS data standards from day one. All patient data encrypted at rest and in transit. On-premise deployment options available for strict data sovereignty requirements.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS ══════════════════════════════════════════════════════ -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item fade-up">
+      <div class="stat-big"><em>5–10</em> min</div>
+      <div class="stat-desc">saved per consultation through better pre-appointment context</div>
+    </div>
+    <div class="stat-item fade-up d1">
+      <div class="stat-big">$<em>3.3B</em></div>
+      <div class="stat-desc">US total addressable market across 267k+ practices</div>
+    </div>
+    <div class="stat-item fade-up d2">
+      <div class="stat-big"><em>£80</em>/hr</div>
+      <div class="stat-desc">average UK clinical cost recovered through smarter triage</div>
+    </div>
+    <div class="stat-item fade-up d3">
+      <div class="stat-big"><em>24/7</em></div>
+      <div class="stat-desc">always-on patient triage — no receptionist needed out of hours</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ══════════════════════════════════════════════ -->
+<section id="testimonials">
+  <div class="test-head fade-up">
+    <div class="section-eyebrow">Testimonials</div>
+    <h2 class="section-title">What clinicians are saying</h2>
+    <p class="section-sub">We're in active conversations with GP practices and specialist clinics across the UK. Pilot testimonials are on their way.</p>
+  </div>
+  <div class="test-empty fade-up">
+    <div class="test-empty-icon">
+      <svg viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    </div>
+    <h3>Be among our first partners</h3>
+    <p>We're actively piloting Catalynk with private clinics and GP practices. Join our early access programme and help shape the future of clinical triage — your feedback will directly inform how we build.</p>
+    <a href="#demo" class="btn-primary" style="display:inline-flex">Apply for Early Access &nbsp;→</a>
+  </div>
+</section>
+
+<!-- ═══ PRICING ════════════════════════════════════════════════════ -->
+<section id="pricing">
+  <div class="price-head fade-up">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Simple, <em>transparent</em> pricing</h2>
+    <p class="section-sub">Priced relative to appointment volume. We save 10–20× what we charge — before the end of your first month.</p>
+  </div>
+  <div class="price-grid">
+    <!-- Starter -->
+    <div class="price-card fade-up">
+      <div class="price-tier">Solo Practice</div>
+      <div class="price-name">Starter</div>
+      <div class="price-amount">$5k</div>
+      <div class="price-cadence">per year · 1 practitioner</div>
+      <div class="price-divider"></div>
+      <ul class="price-list">
+        <li>AI-powered patient triage</li>
+        <li>Thread-based symptom tracking</li>
+        <li>Clinical summaries per appointment</li>
+        <li>Single-user dashboard</li>
+        <li>Email support</li>
+        <li>GDPR compliant</li>
+      </ul>
+      <a href="#demo" class="btn-price outline">Get started</a>
+    </div>
+    <!-- Growth (featured) -->
+    <div class="price-card featured fade-up d1">
+      <div class="price-badge">Most Popular</div>
+      <div class="price-tier">Group Practice</div>
+      <div class="price-name">Growth</div>
+      <div class="price-amount">$12k</div>
+      <div class="price-cadence">per year · up to 5 practitioners</div>
+      <div class="price-divider"></div>
+      <ul class="price-list">
+        <li>Everything in Starter</li>
+        <li>Multi-user clinic dashboard</li>
+        <li>Priority queue management</li>
+        <li>Appointment scheduling integration</li>
+        <li>Analytics &amp; reporting</li>
+        <li>Dedicated onboarding support</li>
+      </ul>
+      <a href="#demo" class="btn-price solid">Request a Demo</a>
+    </div>
+    <!-- Enterprise -->
+    <div class="price-card fade-up d2">
+      <div class="price-tier">Multi-Site</div>
+      <div class="price-name">Enterprise</div>
+      <div class="price-amount">$20k+</div>
+      <div class="price-cadence">per year · unlimited practitioners</div>
+      <div class="price-divider"></div>
+      <ul class="price-list">
+        <li>Everything in Growth</li>
+        <li>Multi-site management</li>
+        <li>Custom model fine-tuning</li>
+        <li>On-premise deployment</li>
+        <li>EHR/EMR integration</li>
+        <li>SLA &amp; dedicated account manager</li>
+      </ul>
+      <a href="#demo" class="btn-price outline">Talk to us</a>
+    </div>
+  </div>
+  <p class="price-note fade-up">Annual billing. NHS and non-profit pricing available on request.</p>
+</section>
+
+<!-- ═══ ABOUT ══════════════════════════════════════════════════════ -->
+<section id="about">
+  <div class="about-head">
+    <div class="about-top fade-up">
+      <div>
+        <div class="section-eyebrow">About</div>
+        <h2 class="section-title">Built by people who<br><em>lived the problem</em></h2>
+        <p class="section-sub" style="margin-top:16px">
+          Catalynk was born from personal experience with the NHS — five emergency surgeries, relentless repetition of the same medical history, zero coordination between departments. When structured symptom tracking directly informed a successful preventative operation, it crystallised the insight: the system needs continuous patient context, not better forms.
+        </p>
+        <div class="about-quote" style="margin-top:28px">
+          <p>"The system doesn't need better intake forms. It needs continuous patient context that evolves in real time."</p>
+        </div>
+      </div>
+      <div class="team-grid" style="margin-top:0">
+        <div class="team-card fade-up d1">
+          <div class="team-ava">E</div>
+          <div class="team-name">Emily Kelt</div>
+          <div class="team-role">Co-Founder &amp; CEO</div>
+          <p class="team-bio">Computer Science, Cambridge. Built and sold software to a private clinic as an undergraduate. HackEurope winner — 1st place across 3 tracks. Lived experience navigating NHS inefficiencies.</p>
+          <div class="team-chips">
+            <span class="chip">Cambridge CS</span>
+            <span class="chip">HackEurope</span>
+            <span class="chip">Healthcare</span>
+          </div>
+        </div>
+        <div class="team-card fade-up d2">
+          <div class="team-ava">Y</div>
+          <div class="team-name">Yasith</div>
+          <div class="team-role">Co-Founder &amp; CTO</div>
+          <p class="team-bio">Software engineering background with production systems shipped in internships. Multiple national hackathon winner. Master's research in decentralised prediction markets at Cambridge.</p>
+          <div class="team-chips">
+            <span class="chip">Cambridge CS</span>
+            <span class="chip">Full-Stack</span>
+            <span class="chip">AI/ML</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEMO ═══════════════════════════════════════════════════════ -->
+<section id="demo">
+  <div class="demo-blob"></div>
+  <div class="demo-inner">
+    <div class="fade-up">
+      <div class="section-eyebrow" style="color:var(--green-light)">Request a Demo</div>
+      <h2 class="demo-title">See Catalynk<br><em>in your clinic</em></h2>
+      <p class="demo-sub">We'll show you exactly how Catalynk fits into your existing workflow — no disruption, no technical overhead. Just better consultations from day one.</p>
+      <div class="demo-perks">
+        <div class="perk">
+          <div class="perk-icon"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div>
+            <h4>30-minute live walkthrough</h4>
+            <p>See the patient and doctor interfaces with your workflow in mind</p>
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div>
+            <h4>Custom pilot setup</h4>
+            <p>Tailored to your specialty and patient demographics from day one</p>
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div>
+            <h4>No commitment required</h4>
+            <p>Run a 30-day free pilot and measure the impact yourself</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-form fade-up d1">
+      <div class="form-head">
+        <h3>Book your demo</h3>
+        <p>We'll be in touch within 24 hours.</p>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" type="text" placeholder="Dr. Sarah">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" type="text" placeholder="Johnson">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Work email</label>
+        <input class="form-input" type="email" placeholder="sarah@yourclinic.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Practice name</label>
+        <input class="form-input" type="text" placeholder="Your Clinic Name">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Practice type</label>
+          <select class="form-select">
+            <option value="">Select type</option>
+            <option>GP / Primary Care</option>
+            <option>Specialist Clinic</option>
+            <option>Private Practice</option>
+            <option>Hospital Department</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. of practitioners</label>
+          <select class="form-select">
+            <option value="">Select range</option>
+            <option>Solo (1)</option>
+            <option>2–5</option>
+            <option>6–15</option>
+            <option>15+</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-submit" id="submit-btn">Request a Demo →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#" class="foot-logo">Cata<span>lynk</span></a>
+        <p class="foot-tagline">AI triage and clinical documentation for the modern medical practice.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Product</h5>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#demo">Request a Demo</a>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <a href="#about">About Us</a>
+        <a href="#testimonials">Testimonials</a>
+        <a href="#">Blog</a>
+        <a href="#">Careers</a>
+      </div>
+      <div class="foot-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">GDPR</a>
+        <a href="#">Security</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="foot-copy">© 2025 Catalynk Ltd. Cambridge, UK.</span>
+      <div class="foot-links">
+        <a href="#">Twitter / X</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── Scripts ─────────────────────────────────────────────────── -->
+<script>
+  // Sticky nav
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // Fade-up on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+  // Smooth anchor scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+
+  // Demo form submit
+  document.getElementById('submit-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    this.textContent = '✓ Request received — we\'ll be in touch within 24 hours!';
+    this.style.background = '#2D6A4F';
+    this.disabled = true;
+  });
+</script>
+</body>
+</html>
